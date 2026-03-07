@@ -1,9 +1,10 @@
-streamlit==1.32.2
+streamlit
 streamlit-webrtc==0.47.1
-opencv-python-headless==4.9.0.80
-numpy==1.26.4
+opencv-python-headless
+numpy
 av==11.0.0
 aiortc==1.6.0
-deepface==0.0.83
+deepface
 tensorflow-cpu==2.15.0
 protobuf==3.20.3
+tf-keras
