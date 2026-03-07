@@ -1,5 +1,8 @@
-streamlit==1.32.0
-streamlit-webrtc==0.47.1
-opencv-python-headless==4.9.0.80
-numpy==1.26.4
-av==10.0.0
+streamlit
+streamlit-webrtc
+deepface
+opencv-python-headless
+numpy
+pillow
+tensorflow
+av
