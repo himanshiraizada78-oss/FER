@@ -1,55 +1,127 @@
 import streamlit as st
-import cv2
 import numpy as np
+import pandas as pd
 from deepface import DeepFace
 from PIL import Image
 
-st.set_page_config(page_title="Face Expression Analyzer", layout="centered")
+# ---------------- PAGE CONFIG ----------------
+st.set_page_config(
+    page_title="AI Face Expression Analyzer",
+    page_icon="😊",
+    layout="wide"
+)
 
-st.title("😊 AI Face Expression Analyzer")
-st.write("Detect your emotions using your webcam")
+# ---------------- CUSTOM CSS ----------------
+st.markdown("""
+<style>
 
-# Session state for camera
-if "camera_on" not in st.session_state:
-    st.session_state.camera_on = False
+.main {
+    background-color: #0E1117;
+}
 
-# Buttons
-col1, col2 = st.columns(2)
+.title {
+    text-align: center;
+    font-size: 45px;
+    font-weight: bold;
+    color: #00FFFF;
+}
 
+.subtitle {
+    text-align:center;
+    font-size:18px;
+    color:#CCCCCC;
+}
+
+.result-box {
+    padding:20px;
+    border-radius:12px;
+    background-color:#1f1f1f;
+}
+
+</style>
+""", unsafe_allow_html=True)
+
+# ---------------- TITLE ----------------
+st.markdown('<p class="title">😊 AI Face Expression Analyzer</p>', unsafe_allow_html=True)
+st.markdown('<p class="subtitle">Detect human emotions using Artificial Intelligence</p>', unsafe_allow_html=True)
+
+st.write("")
+
+# ---------------- SIDEBAR ----------------
+st.sidebar.title("⚙ Control Panel")
+
+camera_on = st.sidebar.toggle("Start Camera")
+
+st.sidebar.markdown("---")
+st.sidebar.markdown("### 📘 About Project")
+
+st.sidebar.write(
+"""
+This AI application detects human emotions from facial expressions.
+
+Technology used:
+- Streamlit
+- DeepFace
+- Deep Learning (CNN)
+
+Possible emotions detected:
+Happy, Sad, Angry, Fear, Surprise, Neutral
+"""
+)
+
+# ---------------- PAGE LAYOUT ----------------
+col1, col2 = st.columns([2,1])
+
+# ---------------- CAMERA SECTION ----------------
 with col1:
-    if st.button("Start Camera"):
-        st.session_state.camera_on = True
 
-with col2:
-    if st.button("Stop Camera"):
-        st.session_state.camera_on = False
+    st.subheader("📷 Camera")
 
+    if camera_on:
+        img_file = st.camera_input("Take a Picture")
 
-# Webcam
-if st.session_state.camera_on:
+    else:
+        st.info("Turn on the camera from the sidebar")
+        img_file = None
 
-    img_file = st.camera_input("Take a picture")
+# ---------------- EMOTION DETECTION ----------------
+if img_file is not None:
 
-    if img_file is not None:
+    image = Image.open(img_file)
+    img = np.array(image)
 
-        # Convert image
-        image = Image.open(img_file)
-        img = np.array(image)
+    with st.spinner("Analyzing Emotion..."):
 
-        st.image(img, caption="Captured Image")
+        result = DeepFace.analyze(
+            img,
+            actions=['emotion'],
+            enforce_detection=False
+        )
 
-        try:
-            result = DeepFace.analyze(img, actions=['emotion'], enforce_detection=False)
+    emotion = result[0]['dominant_emotion']
+    emotions = result[0]['emotion']
 
-            emotion = result[0]['dominant_emotion']
-            emotions = result[0]['emotion']
+# ---------------- RESULT SECTION ----------------
+    with col2:
 
-            st.success(f"Dominant Emotion: {emotion}")
+        st.subheader("📊 Emotion Result")
 
-            st.subheader("Emotion Probabilities")
+        st.success(f"Dominant Emotion: {emotion.upper()}")
 
-            for key, value in emotions.items():
-                st.write(f"{key} : {round(value,2)} %")
+        df = pd.DataFrame(
+            emotions.items(),
+            columns=["Emotion","Score"]
+        )
 
-        except Exception as e:
-            st.error("Face not detected clearly. Try again.")
+        st.bar_chart(df.set_index("Emotion"))
+
+        st.write("")
+
+        st.markdown("### Emotion Probabilities")
+
+        for key,value in emotions.items():
+            st.write(f"{key} : {round(value,2)} %")
+
+# ---------------- FOOTER ----------------
+st.markdown("---")
+st.markdown("Made with ❤️ using Streamlit & Deep Learning")
