@@ -1,61 +1,55 @@
 import streamlit as st
-import av
 import cv2
+import numpy as np
 from deepface import DeepFace
-from streamlit_webrtc import webrtc_streamer, VideoTransformerBase
+from PIL import Image
 
-st.title("😃 Live Face Expression Analyzer")
+st.set_page_config(page_title="Face Expression Analyzer", layout="centered")
 
-# session state for camera
+st.title("😊 AI Face Expression Analyzer")
+st.write("Detect your emotions using your webcam")
+
+# Session state for camera
 if "camera_on" not in st.session_state:
     st.session_state.camera_on = False
 
-# buttons
+# Buttons
 col1, col2 = st.columns(2)
 
 with col1:
-    if st.button("▶ Start Camera"):
+    if st.button("Start Camera"):
         st.session_state.camera_on = True
 
 with col2:
-    if st.button("⏹ Stop Camera"):
+    if st.button("Stop Camera"):
         st.session_state.camera_on = False
 
 
-class EmotionDetector(VideoTransformerBase):
-
-    def transform(self, frame):
-        img = frame.to_ndarray(format="bgr24")
-
-        try:
-            result = DeepFace.analyze(
-                img,
-                actions=['emotion'],
-                enforce_detection=False
-            )
-
-            emotion = result[0]['dominant_emotion']
-
-            cv2.putText(
-                img,
-                emotion,
-                (50, 50),
-                cv2.FONT_HERSHEY_SIMPLEX,
-                1,
-                (0,255,0),
-                2
-            )
-
-        except:
-            pass
-
-        return img
-
-
-# start webcam only if button pressed
+# Webcam
 if st.session_state.camera_on:
 
-    webrtc_streamer(
-        key="emotion",
-        video_transformer_factory=EmotionDetector
-    )
+    img_file = st.camera_input("Take a picture")
+
+    if img_file is not None:
+
+        # Convert image
+        image = Image.open(img_file)
+        img = np.array(image)
+
+        st.image(img, caption="Captured Image")
+
+        try:
+            result = DeepFace.analyze(img, actions=['emotion'], enforce_detection=False)
+
+            emotion = result[0]['dominant_emotion']
+            emotions = result[0]['emotion']
+
+            st.success(f"Dominant Emotion: {emotion}")
+
+            st.subheader("Emotion Probabilities")
+
+            for key, value in emotions.items():
+                st.write(f"{key} : {round(value,2)} %")
+
+        except Exception as e:
+            st.error("Face not detected clearly. Try again.")
