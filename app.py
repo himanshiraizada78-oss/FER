@@ -20,10 +20,10 @@ st.markdown("""
 }
 
 .title {
-    text-align:center;
-    font-size:45px;
-    font-weight:bold;
-    color:#00FFFF;
+    text-align: center;
+    font-size: 45px;
+    font-weight: bold;
+    color: #00FFFF;
 }
 
 .subtitle {
@@ -34,7 +34,7 @@ st.markdown("""
 
 .result-box {
     padding:20px;
-    border-radius:10px;
+    border-radius:12px;
     background-color:#1f1f1f;
 }
 
@@ -47,51 +47,27 @@ st.markdown('<p class="subtitle">Detect human emotions using Artificial Intellig
 
 st.write("")
 
-# ---------------- HERO SECTION ----------------
-st.image(
-"https://cdn-icons-png.flaticon.com/512/4140/4140048.png",
-width=120
-)
-
-st.markdown("""
-### 🤖 AI Emotion Detection System
-
-This application uses **Deep Learning** to analyze facial expressions  
-and detect human emotions.
-
-### Features
-- Webcam emotion detection
-- Emotion probability dashboard
-- Interactive AI interface
-""")
-
-st.write("")
-
 # ---------------- SIDEBAR ----------------
 st.sidebar.title("⚙ Control Panel")
 
 camera_on = st.sidebar.toggle("Start Camera")
 
 st.sidebar.markdown("---")
+st.sidebar.markdown("### 📘 About Project")
 
-st.sidebar.markdown("### 📘 Project Details")
+st.sidebar.write(
+"""
+This AI application detects human emotions from facial expressions.
 
-st.sidebar.write("""
-**Project:** Face Expression Analyzer  
-
-**Technologies Used:**
+Technology used:
 - Streamlit
 - DeepFace
-- TensorFlow
-- OpenCV
-- NumPy
+- Deep Learning (CNN)
 
-**Model:**
-CNN-based facial emotion recognition model.
-
-**Emotions Detected:**
+Possible emotions detected:
 Happy, Sad, Angry, Fear, Surprise, Neutral
-""")
+"""
+)
 
 # ---------------- PAGE LAYOUT ----------------
 col1, col2 = st.columns([2,1])
@@ -103,6 +79,7 @@ with col1:
 
     if camera_on:
         img_file = st.camera_input("Take a Picture")
+
     else:
         st.info("Turn on the camera from the sidebar")
         img_file = None
@@ -121,11 +98,8 @@ if img_file is not None:
             enforce_detection=False
         )
 
-    if isinstance(result, list):
-        result = result[0]
-
-    emotion = result['dominant_emotion']
-    emotions = result['emotion']
+    emotion = result[0]['dominant_emotion']
+    emotions = result[0]['emotion']
 
 # ---------------- RESULT SECTION ----------------
     with col2:
@@ -134,9 +108,6 @@ if img_file is not None:
 
         st.success(f"Dominant Emotion: {emotion.upper()}")
 
-        st.write("")
-
-        # Emotion Chart
         df = pd.DataFrame(
             emotions.items(),
             columns=["Emotion","Score"]
@@ -146,31 +117,10 @@ if img_file is not None:
 
         st.write("")
 
-        # Emotion Progress Bars
-        st.markdown("### 📈 Emotion Confidence")
+        st.markdown("### Emotion Probabilities")
 
-        for emotion_name, score in emotions.items():
-            st.write(f"{emotion_name} : {round(score,2)} %")
-            st.progress(int(score))
-
-# ---------------- AI EXPLANATION ----------------
-st.write("")
-
-with st.expander("📘 How this AI model works"):
-    st.write("""
-This system uses a pretrained **Convolutional Neural Network (CNN)** model
-from the DeepFace framework to detect facial emotions.
-
-### Steps:
-
-1. Capture image from webcam
-2. Detect face in the image
-3. Extract facial features
-4. Apply deep learning model
-5. Predict human emotion
-
-The model analyzes facial muscles and expressions to classify emotions.
-""")
+        for key,value in emotions.items():
+            st.write(f"{key} : {round(value,2)} %")
 
 # ---------------- FOOTER ----------------
 st.markdown("---")
