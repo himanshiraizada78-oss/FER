@@ -1,8 +1,8 @@
 streamlit==1.32.0
 numpy==1.26.4
-pandas
-opencv-python-headless
+pandas==2.2.1
+opencv-python-headless==4.9.0.80
 deepface==0.0.83
 tensorflow-cpu==2.15.0
 tf-keras==2.15.0
-pillow
+pillow==10.2.0
